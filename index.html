@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ウェブマーケティング単語帳</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --secondary: #06b6d4;
+      --success: #10b981;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 24px rgba(0,0,0,0.10);
+    }
+
+    body {
+      font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: #fff;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 12px rgba(79,70,229,0.25);
+    }
+    header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.02em; }
+    header .subtitle { font-size: 0.8rem; opacity: 0.85; margin-top: 2px; }
+
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+    .stat { background: rgba(255,255,255,0.2); border-radius: 999px; padding: 4px 12px; }
+
+    main {
+      width: 100%;
+      max-width: 680px;
+      padding: 24px 16px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Category filter */
+    .category-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      width: 100%;
+      justify-content: center;
+    }
+    .cat-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 16px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: var(--border);
+      color: var(--text-muted);
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .cat-btn.active, .cat-btn:hover {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Progress */
+    .progress-wrap {
+      width: 100%;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 999px;
+      transition: width 0.4s ease;
+    }
+
+    /* Flashcard */
+    .card-scene {
+      width: 100%;
+      height: 260px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.4,0,0.2,1);
+      border-radius: 20px;
+    }
+    .card.flipped { transform: rotateY(180deg); }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 28px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      box-shadow: var(--shadow);
+    }
+    .card-front {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+    }
+    .card-back {
+      background: linear-gradient(135deg, #ede9fe, #cffafe);
+      transform: rotateY(180deg);
+    }
+
+    .card-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      background: #ede9fe;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .card-back .card-badge {
+      background: rgba(255,255,255,0.6);
+      color: var(--primary-dark);
+    }
+
+    .card-term {
+      font-size: 1.9rem;
+      font-weight: 800;
+      text-align: center;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .card-hint {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .card-def {
+      font-size: 1.05rem;
+      font-weight: 600;
+      text-align: center;
+      color: var(--primary-dark);
+      line-height: 1.6;
+    }
+    .card-example {
+      margin-top: 14px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.5;
+      background: rgba(255,255,255,0.5);
+      padding: 8px 14px;
+      border-radius: 10px;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .btn {
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.18s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-nav {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      color: var(--text);
+      padding: 10px 22px;
+      font-size: 0.9rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .btn-nav:hover:not(:disabled) { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .btn-nav:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .card-counter {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      min-width: 64px;
+      text-align: center;
+    }
+
+    /* Reaction buttons */
+    .reaction-row {
+      display: flex;
+      gap: 12px;
+    }
+    .btn-reaction {
+      padding: 10px 24px;
+      font-size: 0.9rem;
+      border-radius: 999px;
+    }
+    .btn-known {
+      background: var(--success);
+      color: #fff;
+    }
+    .btn-known:hover { background: #059669; transform: translateY(-1px); }
+    .btn-unknown {
+      background: var(--danger);
+      color: #fff;
+    }
+    .btn-unknown:hover { background: #dc2626; transform: translateY(-1px); }
+
+    /* Shuffle / Reset */
+    .action-row {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-secondary {
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      color: var(--text-muted);
+      padding: 8px 18px;
+      font-size: 0.8rem;
+    }
+    .btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+    /* Result modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 24px;
+      padding: 40px 36px;
+      max-width: 380px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    }
+    .modal h2 { font-size: 1.5rem; margin-bottom: 8px; }
+    .modal .score { font-size: 3rem; font-weight: 900; color: var(--primary); margin: 16px 0; }
+    .modal p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px; }
+    .btn-modal { background: var(--primary); color: #fff; padding: 12px 32px; font-size: 1rem; border-radius: 999px; border: none; cursor: pointer; font-weight: 700; }
+    .btn-modal:hover { background: var(--primary-dark); }
+
+    .flip-tip {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* List modal */
+    .list-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 100;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px 16px;
+      overflow-y: auto;
+    }
+    .list-backdrop.show { display: flex; }
+    .list-modal {
+      background: #fff;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 620px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+      overflow: hidden;
+      margin: auto;
+    }
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 1;
+    }
+    .list-header h2 { font-size: 1.1rem; font-weight: 700; }
+    .list-total { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+    .btn-close {
+      background: var(--border);
+      border: none;
+      border-radius: 999px;
+      width: 32px;
+      height: 32px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .btn-close:hover { background: #cbd5e1; }
+    .list-search {
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .list-search input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 0.9rem;
+      outline: none;
+      font-family: inherit;
+    }
+    .list-search input:focus { border-color: var(--primary); }
+    .list-body { padding: 8px 0 16px; }
+    .list-category-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+      text-transform: uppercase;
+      padding: 12px 24px 4px;
+    }
+    .list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 24px;
+      border-bottom: 1px solid #f1f5f9;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .list-item:hover { background: #f8fafc; }
+    .list-item:last-child { border-bottom: none; }
+    .list-item-term {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      min-width: 160px;
+      flex-shrink: 0;
+    }
+    .list-item-def {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .list-empty {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      padding: 40px 24px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>📖 ウェブマーケティング単語帳</h1>
+    <div class="subtitle">Web Marketing Vocabulary</div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat" id="stat-known">✅ 正解: 0</div>
+    <div class="stat" id="stat-unknown">❌ 要復習: 0</div>
+  </div>
+</header>
+
+<main>
+  <div class="category-bar" id="category-bar"></div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span id="progress-text">進捗</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="card-scene" id="card-scene" onclick="flipCard()">
+    <div class="card" id="card">
+      <div class="card-face card-front">
+        <div class="card-badge" id="front-category">カテゴリ</div>
+        <div class="card-term" id="front-term">-</div>
+        <div class="card-hint">カードをタップして答えを確認 👆</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-badge" id="back-category">カテゴリ</div>
+        <div class="card-def" id="back-def">-</div>
+        <div class="card-example" id="back-example"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flip-tip" id="flip-tip">タップでカードを裏返す</div>
+
+  <div class="reaction-row" id="reaction-row" style="display:none;">
+    <button class="btn btn-reaction btn-known" onclick="react(true)">✅ わかった</button>
+    <button class="btn btn-reaction btn-unknown" onclick="react(false)">❌ 要復習</button>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-nav" id="btn-prev" onclick="navigate(-1)" disabled>◀ 前へ</button>
+    <div class="card-counter" id="card-counter">1 / 1</div>
+    <button class="btn btn-nav" id="btn-next" onclick="navigate(1)">次へ ▶</button>
+  </div>
+
+  <div class="action-row">
+    <button class="btn btn-secondary" onclick="shuffleCards()">🔀 シャッフル</button>
+    <button class="btn btn-secondary" onclick="resetProgress()">🔄 リセット</button>
+    <button class="btn btn-secondary" onclick="filterUnknown()">❌ 要復習のみ</button>
+    <button class="btn btn-secondary" onclick="openList()">📋 用語一覧</button>
+  </div>
+</main>
+
+<div class="list-backdrop" id="list-backdrop" onclick="closeListOutside(event)">
+  <div class="list-modal">
+    <div class="list-header">
+      <div>
+        <h2>📋 用語一覧</h2>
+        <div class="list-total" id="list-total"></div>
+      </div>
+      <button class="btn-close" onclick="closeList()">✕</button>
+    </div>
+    <div class="list-search">
+      <input type="text" id="list-search-input" placeholder="用語を検索..." oninput="renderList()">
+    </div>
+    <div class="list-body" id="list-body"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <h2>🎉 完了！</h2>
+    <div class="score" id="modal-score">0%</div>
+    <p id="modal-msg">お疲れ様でした！</p>
+    <button class="btn-modal" onclick="restartAll()">もう一度チャレンジ</button>
+  </div>
+</div>
+
+<script>
+const ALL_CARDS = [
+  // SEO（検索対策）
+  { category: "SEO（検索対策）", term: "SEO", def: "Googleで検索したとき、自分のサイトをなるべく上に表示させるための工夫のこと。お金を払わず自然に上位に出ることを目指す。", example: "「渋谷 ネイルサロン」と検索して1ページ目に出てくるお店は、SEOがうまくいっている。" },
+  { category: "SEO（検索対策）", term: "検索キーワード", def: "Googleの検索窓に入力する言葉のこと。お客さんがどんな言葉で探しているかを知ることがSEOの第一歩。", example: "「ネイルサロン 渋谷 安い」「ネイル 初めて 予約なし」など、お客さんが実際に入力しそうな言葉を調べる。" },
+  { category: "SEO（検索対策）", term: "検索順位", def: "Googleで何かを検索したとき、自分のサイトが何番目に表示されているか。1位が一番クリックされやすい。", example: "「ダイエット方法」で検索して5番目に自分のブログが出てきた → 検索順位5位。" },
+  { category: "SEO（検索対策）", term: "被リンク", def: "他のサイトから「このサイトを見てください」とリンクを貼ってもらうこと。多くの人に紹介されるほどGoogleに信頼されやすくなる。", example: "有名なニュースサイトで自社サービスが取り上げられてリンクが貼られた → 検索順位が上がった。" },
+  { category: "SEO（検索対策）", term: "検索結果の説明文", def: "Googleの検索結果でタイトルの下に出る2〜3行の説明文のこと。わかりやすく書くとクリックされやすくなる。", example: "検索結果に「〇〇をやさしく解説。初めての方でも5分でわかります」と表示される部分がこれ。" },
+
+  // Web広告
+  { category: "Web広告", term: "リスティング広告", def: "Googleで何かを検索すると、結果の一番上に「広告」と書かれて出てくるテキストの広告のこと。", example: "「英会話 オンライン」と検索すると、一番上に小さく「広告」と書かれたリンクが出てくる。あれがリスティング広告。" },
+  { category: "Web広告", term: "バナー広告", def: "ニュースサイトなどを見ているとき、画面の横や記事の間に出てくる画像や動画の広告のこと。", example: "天気サイトを見ていると横に「〇〇の無料お試しはこちら」という画像が出てくる。あれがバナー広告。" },
+  { category: "Web広告", term: "追いかけ広告", def: "一度見た商品が、他のサイトを見ているときにも広告として出てきてくれる仕組みのこと。正式名称はリターゲティング広告。", example: "ネットショッピングでスニーカーを見ていたら、翌日ニュースを読んでいるときも同じスニーカーの広告が出てきた。あれがこれ。" },
+  { category: "Web広告", term: "クリック単価（CPC）", def: "広告が1回クリックされるたびにかかる費用のこと。クリックされない限りお金はかからない。", example: "「1クリック200円」に設定して500回クリックされた → 広告費の合計は10万円。" },
+  { category: "Web広告", term: "クリック率（CTR）", def: "広告が表示された回数のうち、実際にクリックされた回数の割合。高いほど「興味を持ってもらえている広告」といえる。", example: "広告が100回表示されて3回クリックされた → クリック率は3%。" },
+  { category: "Web広告", term: "広告の表示回数", def: "広告や投稿が画面に表示された回数のこと。クリックされなくても、表示されただけでカウントされる。", example: "バナー広告が1万回表示されたけどクリックは100回だった → 表示回数1万、クリック100回。" },
+  { category: "Web広告", term: "広告費用対効果（ROAS）", def: "広告にかけたお金に対して、何倍の売上が上がったかを示す数字。高いほど広告がうまく機能している。", example: "広告費10万円をかけて50万円の売上 → ROAS 500%（5倍の売上）。" },
+  { category: "Web広告", term: "1件あたりの獲得費用（CPA）", def: "申し込みや購入を1件取るためにかかった広告費の合計。低いほど効率のよい広告といえる。", example: "広告費5万円で25件の問い合わせを獲得 → 1件あたり2,000円かかった計算。" },
+
+  // SNS・発信
+  { category: "SNS・発信", term: "ハッシュタグ", def: "SNSで「#」に続けて書くタグのこと。同じタグを検索した人の目に触れやすくなる。", example: "#カフェ巡り を付けてInstagramに写真を投稿すると、カフェ好きな人に見てもらいやすくなる。" },
+  { category: "SNS・発信", term: "エンゲージメント率", def: "投稿を見た人のうち、いいね・コメント・シェアなど何かアクションをした人の割合。フォロワー数が多くてもこの数字が低いと、実は読まれていないことがある。", example: "フォロワー1,000人の投稿に100いいね → エンゲージメント率10%（高い方）。" },
+  { category: "SNS・発信", term: "インフルエンサー", def: "SNSでたくさんのフォロワーを持ち、発信内容が多くの人に影響を与える人のこと。", example: "フォロワー10万人の美容系アカウントを持つ人に新しいコスメを紹介してもらったら、一気に認知が広まった。" },
+  { category: "SNS・発信", term: "口コミ", def: "お客さんが自分でSNSに書いてくれる感想・写真・レビューのこと。お店が作った宣伝より信頼されやすい。", example: "来店したお客さんが「このラテアートかわいすぎ！」とInstagramに投稿してくれた → お店の自然な宣伝になる。" },
+  { category: "SNS・発信", term: "バイラル（拡散）", def: "SNSで投稿が次々とシェアされ、多くの人に広まること。うまくいくと広告費ゼロで一気に知ってもらえる。", example: "面白い動画をTikTokに投稿したら、フォロワー以外にも広まって一晩で10万回再生された。" },
+  { category: "SNS・発信", term: "コンテンツ", def: "ブログ記事・動画・SNSの投稿・写真など、ネットで発信するあらゆる情報のこと。", example: "「初めてのダイエット講座」というブログ記事も「5分で作れる朝食」のYouTube動画も、どちらもコンテンツ。" },
+
+  // 数字・指標
+  { category: "数字・指標", term: "KPI（目標の数字）", def: "「今月は何件の問い合わせを取る」など、目標に向けて追いかける具体的な数字のこと。", example: "「今月の新規問い合わせ50件」「広告のクリック率3%以上」など、チームで追いかける数字を決める。" },
+  { category: "数字・指標", term: "コンバージョン（CV）", def: "サイトで達成したいゴール（申し込み・購入・資料のダウンロードなど）が実際に行われたこと。", example: "LPを見た人が「無料相談を申し込む」ボタンを押した → 1コンバージョン達成！" },
+  { category: "数字・指標", term: "申し込み率（CVR）", def: "サイトを訪れた人のうち、申し込みや購入をした人の割合。この数字が高いほどサイトの出来がよい。", example: "1,000人がLPを見て20人が申し込んだ → 申し込み率（CVR）は2%。" },
+  { category: "数字・指標", term: "直帰率", def: "サイトに来たけど、1ページだけ見てすぐに帰ってしまった人の割合。高すぎる場合、内容が期待と違ったサインかもしれない。", example: "LPに来た100人のうち80人がすぐ帰ってしまった → 直帰率80%。内容や見た目を見直すサイン。" },
+  { category: "数字・指標", term: "ページビュー（PV）", def: "ページが表示された回数のこと。同じ人が3回見ると3回分カウントされる。サイトがどれだけ読まれているかの目安になる。", example: "今月のブログ記事のPVが1万 → それだけの回数、この記事が開かれたということ。" },
+  { category: "数字・指標", term: "A/Bテスト", def: "2つのパターンを実際に比べて、どちらがより成果が出るかをデータで確かめる実験のこと。感覚ではなく数字で正解を見つける。", example: "申し込みボタンを「申し込む（Aパターン）」と「今すぐ無料で試す（Bパターン）」で比べた → Bの方が2倍申し込まれた。" },
+  { category: "数字・指標", term: "ヒートマップ", def: "サイトのどこがよく見られていて、どこで離脱しているかを色で表すツール。赤いほどよく見られている場所。", example: "ヒートマップで確認したら、申し込みボタンまでほとんどの人がスクロールしていないと判明 → ボタンを上に移動した。" },
+
+  // LP・ページ
+  { category: "LP・ページ", term: "LP（ランディングページ）", def: "広告やSNSをクリックした人が最初に見る、申し込みに特化した縦長の1枚ページのこと。", example: "「今すぐ無料体験」という広告をクリックしたら出てくる、サービスの説明と申込フォームが並んだ縦長のページ。" },
+  { category: "LP・ページ", term: "行動喚起（CTA）", def: "「今すぐ申し込む」「無料で試す」など、ページを見た人に次の行動を促すボタンのこと。文言や色を変えるだけで申し込み数が変わる。", example: "「30秒で無料登録する」という大きな緑色のボタン。このボタンがないとどうすればいいかわからず離脱される。" },
+  { category: "LP・ページ", term: "ファーストビュー", def: "ページを開いたとき、スクロールしなくても最初に見える画面のこと。ここで「続きを読むかどうか」が決まる。", example: "LPを開いたときに目に入るキャッチコピーと申し込みボタンの部分。ここが弱いと下まで読まれずに離脱される。" },
+  { category: "LP・ページ", term: "社会的証明", def: "「他の人も使っている・選んでいる」という事実を見せることで、初めて見た人の不安を取り除いて信頼してもらう手法のこと。口コミ件数・星評価・利用者数などがその例。", example: "LPに「利用者1万人突破」「★4.8・口コミ3,000件」と書くと、初めて見た人が安心して申し込みやすくなる。" },
+  { category: "LP・ページ", term: "申し込みフォーム", def: "名前・メールアドレスなどを入力して送信する入力欄のこと。項目が多すぎると途中で諦めて離脱されてしまう。", example: "入力項目を10個から5個に減らしただけで、最後まで入力して送信してくれる人が増えた。" },
+
+  // お客さまを知る
+  { category: "お客さまを知る", term: "ペルソナ", def: "「どんな人に来てほしいか」を、年齢・悩み・生活スタイルまで具体的に描いた理想のお客さん像のこと。", example: "「35歳・女性・育児中・時間がなくて運動できない・スマホをよく使う」というように1人の人物として詳しく描く。" },
+  { category: "お客さまを知る", term: "ターゲット", def: "商品やサービスを届けたいお客さんの層のこと。ペルソナより大まかに「こんな人たち」と範囲を決める。", example: "「30〜40代の女性・育児中のママ」など、届けたい人の範囲をざっくりと決める。" },
+  { category: "お客さまを知る", term: "顧客生涯価値（LTV）", def: "お客さん1人が長い付き合いの中で合計いくら使ってくれるかの金額。長く使ってもらうほどこの数字が大きくなる。", example: "月額5,000円のサービスを2年間使ってくれたお客さん → LTVは12万円（5,000円×24ヶ月）。" },
+  { category: "お客さまを知る", term: "ブランディング", def: "「このお店・サービスといえば〇〇」というイメージを、お客さんの頭の中に作り上げていく活動のこと。", example: "スターバックスは「高くてもおしゃれで居心地がいい」というイメージが定着している。これが長年のブランディングの積み重ね。" },
+  { category: "お客さまを知る", term: "カスタマージャーニー", def: "お客さんが商品を「知る」→「気になる」→「比べる」→「買う」→「また使う」という流れのこと。各段階に合わせた発信が大切。", example: "Instagramで見る → 公式サイトを調べる → 口コミを確認する → 購入する、という一連の流れを想像してみる。" },
+  { category: "お客さまを知る", term: "ステップメール", def: "メルマガに登録した人に、決まった間隔で順番に自動で届くメールのシリーズのこと。設定しておくだけで、手間なく情報を届け続けられる。", example: "登録翌日・3日後・7日後に「使い方」「お客様の声」「限定オファー」が自動で届く仕組み。" },
+  { category: "お客さまを知る", term: "メルマガ配信停止（オプトアウト）", def: "一度「受け取る」と同意したメール配信を後から止めること。メールの末尾に「配信停止はこちら」のリンクを付けることが法律で義務付けられている。", example: "メールの一番下にある「配信停止」リンクをクリックすると、今後そのメルマガが届かなくなる。" },
+]
+
+// State
+let cards = [...ALL_CARDS];
+let currentIdx = 0;
+let isFlipped = false;
+let knownSet = new Set();
+let unknownSet = new Set();
+let currentFilter = "すべて";
+let filteredCards = [...cards];
+
+function getCategories() {
+  const cats = [...new Set(ALL_CARDS.map(c => c.category))];
+  return ["すべて", ...cats];
+}
+
+function renderCategoryBar() {
+  const bar = document.getElementById("category-bar");
+  bar.innerHTML = "";
+  getCategories().forEach(cat => {
+    const btn = document.createElement("button");
+    btn.className = "cat-btn" + (cat === currentFilter ? " active" : "");
+    btn.textContent = cat;
+    btn.onclick = () => setCategory(cat);
+    bar.appendChild(btn);
+  });
+}
+
+function setCategory(cat) {
+  currentFilter = cat;
+  filteredCards = cat === "すべて" ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.category === cat);
+  currentIdx = 0;
+  resetFlip();
+  renderCategoryBar();
+  renderCard();
+  renderProgress();
+}
+
+function renderCard() {
+  if (filteredCards.length === 0) return;
+  const card = filteredCards[currentIdx];
+  document.getElementById("front-category").textContent = card.category;
+  document.getElementById("front-term").textContent = card.term;
+  document.getElementById("back-category").textContent = card.category;
+  document.getElementById("back-def").textContent = card.def;
+  document.getElementById("back-example").textContent = card.example || "";
+  document.getElementById("card-counter").textContent = `${currentIdx + 1} / ${filteredCards.length}`;
+  document.getElementById("btn-prev").disabled = currentIdx === 0;
+  document.getElementById("btn-next").disabled = currentIdx === filteredCards.length - 1;
+}
+
+function renderProgress() {
+  const answered = knownSet.size + unknownSet.size;
+  const total = ALL_CARDS.length;
+  const pct = total > 0 ? Math.round(answered / total * 100) : 0;
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("progress-pct").textContent = pct + "%";
+  document.getElementById("progress-text").textContent = `学習済み ${answered} / ${total} 問`;
+  document.getElementById("stat-known").textContent = `✅ 正解: ${knownSet.size}`;
+  document.getElementById("stat-unknown").textContent = `❌ 要復習: ${unknownSet.size}`;
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById("card").classList.toggle("flipped", isFlipped);
+  document.getElementById("reaction-row").style.display = isFlipped ? "flex" : "none";
+}
+
+function resetFlip() {
+  isFlipped = false;
+  document.getElementById("card").classList.remove("flipped");
+  document.getElementById("reaction-row").style.display = "none";
+  document.getElementById("flip-tip").textContent = "タップでカードを裏返す";
+}
+
+function navigate(dir) {
+  const newIdx = currentIdx + dir;
+  if (newIdx < 0 || newIdx >= filteredCards.length) return;
+  currentIdx = newIdx;
+  resetFlip();
+  renderCard();
+}
+
+function react(known) {
+  const card = filteredCards[currentIdx];
+  const term = card.term;
+  if (known) { knownSet.add(term); unknownSet.delete(term); }
+  else { unknownSet.add(term); knownSet.delete(term); }
+  renderProgress();
+
+  // Auto advance
+  if (currentIdx < filteredCards.length - 1) {
+    setTimeout(() => { navigate(1); }, 300);
+  } else {
+    // Check completion
+    const answeredAll = (knownSet.size + unknownSet.size) >= filteredCards.length;
+    if (answeredAll || filteredCards.every(c => knownSet.has(c.term) || unknownSet.has(c.term))) {
+      showResult();
+    }
+  }
+}
+
+function showResult() {
+  const total = filteredCards.length;
+  const correct = filteredCards.filter(c => knownSet.has(c.term)).length;
+  const pct = Math.round(correct / total * 100);
+  document.getElementById("modal-score").textContent = pct + "%";
+  let msg = pct >= 80 ? "素晴らしい！マーケティング用語をマスターしています！" :
+            pct >= 50 ? "順調です！要復習の単語を重点的に練習しましょう。" :
+                        "継続は力なり！毎日少しずつ復習しましょう。";
+  document.getElementById("modal-msg").textContent = `正解 ${correct} / ${total} 問。${msg}`;
+  document.getElementById("modal-backdrop").classList.add("show");
+}
+
+function restartAll() {
+  document.getElementById("modal-backdrop").classList.remove("show");
+  resetProgress();
+}
+
+function resetProgress() {
+  knownSet.clear();
+  unknownSet.clear();
+  currentIdx = 0;
+  resetFlip();
+  renderCard();
+  renderProgress();
+}
+
+function shuffleCards() {
+  for (let i = filteredCards.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [filteredCards[i], filteredCards[j]] = [filteredCards[j], filteredCards[i]];
+  }
+  currentIdx = 0;
+  resetFlip();
+  renderCard();
+}
+
+function filterUnknown() {
+  const unk = ALL_CARDS.filter(c => unknownSet.has(c.term));
+  if (unk.length === 0) { alert("要復習の単語はありません！"); return; }
+  filteredCards = unk;
+  currentIdx = 0;
+  currentFilter = "要復習";
+  resetFlip();
+  renderCategoryBar();
+  renderCard();
+}
+
+function openList() {
+  document.getElementById("list-search-input").value = "";
+  renderList();
+  document.getElementById("list-backdrop").classList.add("show");
+}
+
+function closeList() {
+  document.getElementById("list-backdrop").classList.remove("show");
+}
+
+function closeListOutside(e) {
+  if (e.target === document.getElementById("list-backdrop")) closeList();
+}
+
+function renderList() {
+  const query = document.getElementById("list-search-input").value.trim().toLowerCase();
+  const filtered = ALL_CARDS.filter(c =>
+    c.term.toLowerCase().includes(query) || c.def.toLowerCase().includes(query)
+  );
+
+  document.getElementById("list-total").textContent = `全 ${ALL_CARDS.length} 語中 ${filtered.length} 語表示`;
+
+  const body = document.getElementById("list-body");
+  if (filtered.length === 0) {
+    body.innerHTML = '<div class="list-empty">該当する用語が見つかりません</div>';
+    return;
+  }
+
+  const byCategory = {};
+  filtered.forEach(c => {
+    if (!byCategory[c.category]) byCategory[c.category] = [];
+    byCategory[c.category].push(c);
+  });
+
+  body.innerHTML = Object.entries(byCategory).map(([cat, items]) => `
+    <div class="list-category-label">${cat}</div>
+    ${items.map(c => `
+      <div class="list-item" onclick="jumpToCard('${c.term.replace(/'/g, "\\'")}')">
+        <div class="list-item-term">${c.term}</div>
+        <div class="list-item-def">${c.def}</div>
+      </div>
+    `).join("")}
+  `).join("");
+}
+
+function jumpToCard(term) {
+  const idx = ALL_CARDS.findIndex(c => c.term === term);
+  if (idx === -1) return;
+  currentFilter = "すべて";
+  filteredCards = [...ALL_CARDS];
+  currentIdx = idx;
+  resetFlip();
+  renderCategoryBar();
+  renderCard();
+  closeList();
+}
+
+// Keyboard support
+document.addEventListener("keydown", e => {
+  if (document.getElementById("list-backdrop").classList.contains("show")) {
+    if (e.key === "Escape") closeList();
+    return;
+  }
+  if (e.key === " " || e.key === "Enter") { e.preventDefault(); flipCard(); }
+  if (e.key === "ArrowRight") navigate(1);
+  if (e.key === "ArrowLeft") navigate(-1);
+  if (e.key === "o" || e.key === "O") react(true);
+  if (e.key === "x" || e.key === "X") react(false);
+});
+
+// Init
+renderCategoryBar();
+renderCard();
+renderProgress();
+</script>
+</body>
+</html>
