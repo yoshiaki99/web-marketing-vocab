@@ -182,7 +182,7 @@
     .card-def {
       font-size: 1.05rem;
       font-weight: 600;
-      text-align: center;
+      text-align: left;
       color: var(--primary-dark);
       line-height: 1.6;
     }
@@ -190,7 +190,7 @@
       margin-top: 14px;
       font-size: 0.8rem;
       color: var(--text-muted);
-      text-align: center;
+      text-align: left;
       line-height: 1.5;
       background: rgba(255,255,255,0.5);
       padding: 8px 14px;
@@ -374,9 +374,9 @@
     }
     .list-item {
       display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 10px 24px;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px 24px;
       border-bottom: 1px solid #f1f5f9;
       cursor: pointer;
       transition: background 0.15s;
@@ -387,8 +387,6 @@
       font-weight: 700;
       font-size: 0.95rem;
       color: var(--text);
-      min-width: 160px;
-      flex-shrink: 0;
     }
     .list-item-def {
       font-size: 0.82rem;
@@ -401,7 +399,7 @@
       font-size: 0.9rem;
       padding: 40px 24px;
     }
-  @media (max-width: 480px) {
+  @media (max-width: 600px) {
     header { padding: 10px 14px; flex-direction: column; align-items: flex-start; gap: 6px; }
     header h1 { font-size: 1.1rem; }
     header .subtitle { display: none; }
