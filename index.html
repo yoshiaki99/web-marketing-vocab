@@ -401,6 +401,24 @@
       font-size: 0.9rem;
       padding: 40px 24px;
     }
+  @media (max-width: 380px) {
+    header { padding: 10px 14px; flex-direction: column; align-items: flex-start; gap: 6px; }
+    header h1 { font-size: 1.1rem; }
+    header .subtitle { display: none; }
+    .stats-bar { gap: 8px; font-size: 0.78rem; }
+    .stat { padding: 3px 10px; }
+    main { padding: 16px 12px 48px; }
+    .action-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      width: 100%;
+      gap: 8px;
+    }
+    .btn-secondary {
+      white-space: nowrap;
+      justify-content: center;
+    }
+  }
   </style>
 </head>
 <body>
