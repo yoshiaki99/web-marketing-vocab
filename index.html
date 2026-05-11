@@ -8,17 +8,17 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --primary: #4f46e5;
-      --primary-dark: #3730a3;
-      --secondary: #06b6d4;
-      --success: #10b981;
+      --primary: #FF7BAC;
+      --primary-dark: #d45e8a;
+      --secondary: #C9BF00;
+      --success: #3166A3;
       --danger: #ef4444;
-      --bg: #f8fafc;
+      --bg: #FFFFE4;
       --card-bg: #ffffff;
-      --text: #1e293b;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-      --shadow: 0 4px 24px rgba(0,0,0,0.10);
+      --text: #1A1A1C;
+      --text-muted: #7a6a72;
+      --border: #f5d9e8;
+      --shadow: 0 4px 24px rgba(255,123,172,0.12);
     }
 
     body {
@@ -33,13 +33,13 @@
 
     header {
       width: 100%;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, #FF7BAC, #ffaac8);
       color: #fff;
       padding: 18px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 12px rgba(79,70,229,0.25);
+      box-shadow: 0 2px 12px rgba(255,123,172,0.30);
     }
     header h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: 0.02em; }
     header .subtitle { font-size: 0.8rem; opacity: 0.85; margin-top: 2px; }
@@ -106,7 +106,7 @@
     }
     .progress-fill {
       height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      background: linear-gradient(90deg, #FF7BAC, #C9BF00);
       border-radius: 999px;
       transition: width 0.4s ease;
     }
@@ -146,7 +146,7 @@
       border: 2px solid var(--border);
     }
     .card-back {
-      background: linear-gradient(135deg, #ede9fe, #cffafe);
+      background: linear-gradient(135deg, #FFF0F6, #FFFFE4);
       transform: rotateY(180deg);
     }
 
@@ -154,15 +154,15 @@
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.08em;
-      color: var(--primary);
+      color: var(--primary-dark);
       text-transform: uppercase;
       margin-bottom: 12px;
-      background: #ede9fe;
+      background: #FFE4F0;
       padding: 3px 10px;
       border-radius: 999px;
     }
     .card-back .card-badge {
-      background: rgba(255,255,255,0.6);
+      background: rgba(255,255,255,0.7);
       color: var(--primary-dark);
     }
 
@@ -246,7 +246,7 @@
       background: var(--success);
       color: #fff;
     }
-    .btn-known:hover { background: #059669; transform: translateY(-1px); }
+    .btn-known:hover { background: #254f82; transform: translateY(-1px); }
     .btn-unknown {
       background: var(--danger);
       color: #fff;
