@@ -412,6 +412,30 @@
       font-size: 0.9rem;
       padding: 40px 24px;
     }
+  /* Resume toast */
+  .resume-toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1A1A1C;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    transition: transform 0.35s cubic-bezier(.22,1,.36,1), opacity 0.35s;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 200;
+  }
+  .resume-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+
   @media (max-width: 600px) {
     header { padding: 10px 14px; flex-direction: column; align-items: flex-start; gap: 6px; }
     header h1 { font-size: 1.1rem; }
@@ -495,6 +519,8 @@
   </div>
 </main>
 
+<div class="resume-toast" id="resume-toast">📖 前回の続きから再開しました</div>
+
 <div class="list-backdrop" id="list-backdrop" onclick="closeListOutside(event)">
   <div class="list-modal">
     <div class="list-header">
@@ -573,6 +599,54 @@ const ALL_CARDS = [
   { category: "お客さまを知る", term: "メルマガ配信停止（オプトアウト）", def: "一度「受け取る」と同意したメール配信を後から止めること。メールの末尾に「配信停止はこちら」のリンクを付けることが法律で義務付けられている。", example: "メールの一番下にある「配信停止」リンクをクリックすると、今後そのメルマガが届かなくなる。" },
 ]
 
+// LocalStorage persistence
+const STORAGE_KEY = 'vocab_progress_v1';
+
+function saveProgress() {
+  const data = {
+    knownTerms: [...knownSet],
+    unknownTerms: [...unknownSet],
+    currentTerm: filteredCards[currentIdx]?.term,
+    currentFilter
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    knownSet = new Set(data.knownTerms || []);
+    unknownSet = new Set(data.unknownTerms || []);
+    currentFilter = data.currentFilter || 'すべて';
+    if (currentFilter === '要復習') {
+      const unk = ALL_CARDS.filter(c => unknownSet.has(c.term));
+      filteredCards = unk.length > 0 ? unk : [...ALL_CARDS];
+      if (unk.length === 0) currentFilter = 'すべて';
+    } else {
+      filteredCards = currentFilter === 'すべて'
+        ? [...ALL_CARDS]
+        : ALL_CARDS.filter(c => c.category === currentFilter);
+    }
+    if (data.currentTerm) {
+      const idx = filteredCards.findIndex(c => c.term === data.currentTerm);
+      currentIdx = idx >= 0 ? idx : 0;
+    } else {
+      currentIdx = 0;
+    }
+    return knownSet.size + unknownSet.size > 0 || currentIdx > 0;
+  } catch (e) {
+    return false;
+  }
+}
+
+function showResumeBanner() {
+  const toast = document.getElementById('resume-toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
 // State
 let cards = [...ALL_CARDS];
 let currentIdx = 0;
@@ -607,6 +681,7 @@ function setCategory(cat) {
   renderCategoryBar();
   renderCard();
   renderProgress();
+  saveProgress();
 }
 
 function renderCard() {
@@ -652,6 +727,7 @@ function navigate(dir) {
   currentIdx = newIdx;
   resetFlip();
   renderCard();
+  saveProgress();
 }
 
 function react(known) {
@@ -660,6 +736,7 @@ function react(known) {
   if (known) { knownSet.add(term); unknownSet.delete(term); }
   else { unknownSet.add(term); knownSet.delete(term); }
   renderProgress();
+  saveProgress();
 
   // Auto advance
   if (currentIdx < filteredCards.length - 1) {
@@ -694,7 +771,11 @@ function resetProgress() {
   knownSet.clear();
   unknownSet.clear();
   currentIdx = 0;
+  currentFilter = "すべて";
+  filteredCards = [...ALL_CARDS];
+  localStorage.removeItem(STORAGE_KEY);
   resetFlip();
+  renderCategoryBar();
   renderCard();
   renderProgress();
 }
@@ -707,6 +788,7 @@ function shuffleCards() {
   currentIdx = 0;
   resetFlip();
   renderCard();
+  saveProgress();
 }
 
 function filterUnknown() {
@@ -718,6 +800,7 @@ function filterUnknown() {
   resetFlip();
   renderCategoryBar();
   renderCard();
+  saveProgress();
 }
 
 function openList() {
@@ -791,9 +874,11 @@ document.addEventListener("keydown", e => {
 });
 
 // Init
+const hasProgress = loadProgress();
 renderCategoryBar();
 renderCard();
 renderProgress();
+if (hasProgress) showResumeBanner();
 </script>
 </body>
 </html>
