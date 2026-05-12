@@ -258,8 +258,12 @@
     .btn-known {
       background: var(--success);
       color: #fff;
+      padding: 16px 48px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      box-shadow: 0 4px 16px rgba(49,102,163,0.3);
     }
-    .btn-known:hover { background: #254f82; transform: translateY(-1px); }
+    .btn-known:hover { background: #254f82; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(49,102,163,0.4); }
     .btn-unknown {
       background: var(--danger);
       color: #fff;
@@ -467,8 +471,8 @@
     </div>
   </div>
   <div class="stats-bar">
-    <div class="stat" id="stat-unknown">❌ 要復習: 0</div>
     <div class="stat" id="stat-known">✅ OK: 0</div>
+    <div class="stat" id="stat-unknown">❌ 要復習: 0</div>
   </div>
 </header>
 
