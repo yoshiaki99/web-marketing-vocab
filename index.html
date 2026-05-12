@@ -443,7 +443,7 @@
     </div>
   </div>
   <div class="stats-bar">
-    <div class="stat" id="stat-known">✅ 正解: 0</div>
+    <div class="stat" id="stat-known">✅ OK: 0</div>
     <div class="stat" id="stat-unknown">❌ 要復習: 0</div>
   </div>
 </header>
@@ -629,7 +629,7 @@ function renderProgress() {
   document.getElementById("progress-fill").style.width = pct + "%";
   document.getElementById("progress-pct").textContent = pct + "%";
   document.getElementById("progress-text").textContent = `学習済み ${answered} / ${total} 問`;
-  document.getElementById("stat-known").textContent = `✅ 正解: ${knownSet.size}`;
+  document.getElementById("stat-known").textContent = `✅ OK: ${knownSet.size}`;
   document.getElementById("stat-unknown").textContent = `❌ 要復習: ${unknownSet.size}`;
 }
 
@@ -681,7 +681,7 @@ function showResult() {
   let msg = pct >= 80 ? "素晴らしい！マーケティング用語をマスターしています！" :
             pct >= 50 ? "順調です！要復習の単語を重点的に練習しましょう。" :
                         "継続は力なり！毎日少しずつ復習しましょう。";
-  document.getElementById("modal-msg").textContent = `正解 ${correct} / ${total} 問。${msg}`;
+  document.getElementById("modal-msg").textContent = `OK ${correct} / ${total} 問。${msg}`;
   document.getElementById("modal-backdrop").classList.add("show");
 }
 
